@@ -21,8 +21,9 @@
   const vocabularyState = {
     query: '',
     category: 'all',
-    level: 'all',
-    expanded: ''
+    level: targetLevel,
+    expanded: '',
+    visibleLimit: 60
   };
 
   function escapeHtml(value) {
@@ -272,7 +273,7 @@
 
   function updateHeader() {
     const meta = {
-      home: [`DELE ${targetLevel}`, `今天也背一点 DELE ${targetLevel} 词汇`],
+      home: [`DELE ${targetLevel}`, '今日学习'],
       study: ['SM-2 复习', '把词真正记住'],
       quiz: ['随机小测', '双向回忆训练'],
       conjugation: ['动词变位', '规则与不规则形式'],
@@ -296,6 +297,10 @@
   function renderHome() {
     const data = overview();
     const categories = categoryProgress();
+    const homeCategories = categories
+      .slice()
+      .sort((a, b) => b.learned - a.learned || b.total - a.total)
+      .slice(0, 6);
     const dailyDone = data.today.newWords + data.today.reviews;
     const dailyPercent = Math.min(100, Math.round((dailyDone / 20) * 100));
     app.innerHTML = `
@@ -303,9 +308,9 @@
         <div class="hero">
           <div class="hero-grid">
             <div>
-              <span class="eyebrow">APRENDE CADA DÍA</span>
-              <h1>¡Hola!</h1>
-              <p>按 DELE ${targetLevel} 级别组织词汇、篇章表达和动词变位训练。<br>先回忆，再揭晓，让复习间隔自动适应记忆难度。</p>
+              <span class="eyebrow">今天的学习目标</span>
+              <h1>DELE ${targetLevel}</h1>
+              <p>先回想，再看答案。系统会自动安排下次复习。</p>
             </div>
             <div class="goal-panel">
               <div class="goal-head">
@@ -313,7 +318,7 @@
                 <span>${dailyPercent}%</span>
               </div>
               <div class="progress-track"><div class="progress-fill" style="width:${dailyPercent}%"></div></div>
-              <div class="sm-note" style="color:rgba(255,255,255,.58);text-align:left">今日新词与复习总量</div>
+              <div class="sm-note" style="color:rgba(255,255,255,.58);text-align:left">今日新词与复习</div>
             </div>
           </div>
         </div>
@@ -343,27 +348,27 @@
         <div class="home-actions">
           <button class="quick-card primary" data-start-study>
             <span class="icon">▤</span>
-            <h3>开始今日学习</h3>
-            <p>${data.due} 个 ${targetLevel} 待复习 · ${Math.min(20, data.fresh)} 个新词将进入队列</p>
+            <h3>开始学习</h3>
+            <p>${data.due} 个待复习 · ${Math.min(20, data.fresh)} 个新词</p>
           </button>
           <button class="quick-card" data-nav="quiz">
             <span class="icon">?</span>
-            <h3>随机小测</h3>
-            <p>西班牙语与中文双向四选一</p>
+            <h3>小测</h3>
+            <p>双向四选一</p>
           </button>
           <button class="quick-card" data-nav="conjugation">
             <span class="icon">V</span>
-            <h3>动词变位</h3>
-            <p>现在时、简单过去时、虚拟式</p>
+            <h3>变位</h3>
+            <p>三种常用时态</p>
           </button>
         </div>
 
         <div class="section-head">
-          <div><h2>分类进度</h2><p>先积累专业表达，再回到具体语境</p></div>
-          <button class="text-button" data-nav="vocabulary" style="width:auto;color:var(--muted)">查看全部词库 →</button>
+          <div><h2>分类进度</h2><p>显示词量较大的 6 个分类</p></div>
+          <button class="text-button" data-nav="vocabulary" style="width:auto;color:var(--muted)">查看词库 →</button>
         </div>
         <div class="category-grid">
-          ${categories.map(item => `
+          ${homeCategories.map(item => `
             <div class="category-card" style="--category-color:${item.color}">
               <div class="category-top">
                 <div class="category-name"><span class="dot"></span>${escapeHtml(item.name)}</div>
@@ -821,6 +826,7 @@
         </div>
         <div class="result-line" id="vocab-count"></div>
         <div class="word-list" id="vocab-list"></div>
+        <div class="load-more-wrap" id="vocab-more"></div>
       </section>
     `;
     renderVocabList();
@@ -828,11 +834,15 @@
 
   function renderVocabList() {
     const list = filteredWords();
+    const visibleWords = list.slice(0, vocabularyState.visibleLimit);
     const count = document.querySelector('#vocab-count');
     const container = document.querySelector('#vocab-list');
-    if (!count || !container) return;
-    count.textContent = `共 ${list.length} 个词`;
-    container.innerHTML = list.map(word => {
+    const more = document.querySelector('#vocab-more');
+    if (!count || !container || !more) return;
+    count.textContent = list.length > visibleWords.length
+      ? `共 ${list.length} 个词 · 当前显示 ${visibleWords.length} 个`
+      : `共 ${list.length} 个词`;
+    container.innerHTML = visibleWords.map(word => {
       const category = CATEGORIES[word.category];
       const status = wordStatus(word.id);
       const expanded = vocabularyState.expanded === word.id;
@@ -867,6 +877,12 @@
         </div>
       `;
     }).join('');
+    if (!list.length) {
+      container.innerHTML = '<div class="vocab-empty">没有找到匹配词条，试试更短的关键词。</div>';
+    }
+    more.innerHTML = list.length > visibleWords.length
+      ? `<button class="secondary-button load-more-button" data-action="load-more-words">再显示 60 个 <span>剩余 ${list.length - visibleWords.length} 个</span></button>`
+      : '';
   }
 
   function showToast(message) {
@@ -924,6 +940,7 @@
           targetLevel = payload.targetLevel;
           localStorage.setItem(TARGET_KEY, targetLevel);
           vocabularyState.level = targetLevel;
+          vocabularyState.visibleLimit = 60;
         }
         studySession = null;
         quizSession = null;
@@ -951,6 +968,7 @@
       targetLevel = targetButton.dataset.targetLevel;
       localStorage.setItem(TARGET_KEY, targetLevel);
       vocabularyState.level = targetLevel;
+      vocabularyState.visibleLimit = 60;
       studySession = null;
       quizSession = null;
       render();
@@ -1022,6 +1040,11 @@
       renderStudy();
       return;
     }
+    if (event.target.closest('[data-action="load-more-words"]')) {
+      vocabularyState.visibleLimit += 60;
+      renderVocabList();
+      return;
+    }
     const toggleWord = event.target.closest('[data-toggle-word]');
     if (toggleWord) {
       vocabularyState.expanded = vocabularyState.expanded === toggleWord.dataset.toggleWord
@@ -1066,6 +1089,8 @@
   app.addEventListener('input', event => {
     if (event.target.id === 'vocab-search') {
       vocabularyState.query = event.target.value;
+      vocabularyState.visibleLimit = 60;
+      vocabularyState.expanded = '';
       renderVocabList();
     }
   });
@@ -1073,10 +1098,14 @@
   app.addEventListener('change', event => {
     if (event.target.id === 'category-filter') {
       vocabularyState.category = event.target.value;
+      vocabularyState.visibleLimit = 60;
+      vocabularyState.expanded = '';
       renderVocabList();
     }
     if (event.target.id === 'level-filter') {
       vocabularyState.level = event.target.value;
+      vocabularyState.visibleLimit = 60;
+      vocabularyState.expanded = '';
       renderVocabList();
     }
   });

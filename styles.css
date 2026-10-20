@@ -1166,6 +1166,30 @@ kbd {
   background: var(--surface);
 }
 
+.load-more-wrap {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+}
+
+.load-more-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.load-more-button span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.vocab-empty {
+  padding: 54px 20px;
+  color: var(--muted);
+  text-align: center;
+}
+
 .word-row {
   padding: 17px 18px;
 }
@@ -1486,25 +1510,57 @@ kbd {
   #vocab-list .word-row + .word-row {
     border-top: 1px solid var(--line);
   }
+
+  .vocab-empty {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 620px) {
   .hero {
-    padding: 26px 22px;
-    border-radius: 24px;
+    padding: 22px 20px;
+    border-radius: 22px;
   }
 
   .hero h1 {
-    font-size: 48px;
+    margin-top: 6px;
+    font-size: 40px;
+    letter-spacing: -2px;
+  }
+
+  .hero p {
+    font-size: 13px;
   }
 
   .goal-panel {
-    padding: 18px;
+    padding: 14px 16px;
+    border-radius: 17px;
+  }
+
+  .goal-head strong {
+    font-size: 28px;
+  }
+
+  .progress-track {
+    margin-top: 12px;
+  }
+
+  .stats-grid {
+    margin-top: 14px;
+  }
+
+  .stat {
+    padding: 15px 10px;
+  }
+
+  .stat strong {
+    font-size: 24px;
   }
 
   .home-actions,
   .category-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
   }
 
   .dele-level-strip {
@@ -1518,7 +1574,37 @@ kbd {
   }
 
   .quick-card.primary {
-    grid-column: auto;
+    grid-column: 1 / -1;
+  }
+
+  .quick-card {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .quick-card .icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    font-size: 16px;
+  }
+
+  .quick-card h3 {
+    margin: 12px 0 3px;
+    font-size: 17px;
+  }
+
+  .quick-card p {
+    font-size: 12px;
+  }
+
+  .section-head {
+    margin-top: 28px;
+  }
+
+  .category-card {
+    padding: 13px;
+    border-radius: 15px;
   }
 
   .flashcard {
