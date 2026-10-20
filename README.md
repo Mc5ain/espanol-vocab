@@ -63,4 +63,4 @@ SM-2 算法改编自 MIT 授权的 `VienDinhCom/supermemo`：
 
 词表依据公开 DELE 能力主题自主整理，不是 Instituto Cervantes 官方发布词表。
 
-B2 精选词目依据用户提供的《DELE考试精选词汇B2》通过 OCR 提取并清洗。应用未公开 PDF 原文件，也未复制原书例句。
+B2 精选词目、释义及例词依据用户提供的《DELE考试精选词汇B2》通过 OCR 提取并清洗。应用未公开 PDF 原文件，少量无法可靠识别的例句不会展示。
