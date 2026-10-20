@@ -435,42 +435,67 @@
         </div>
         <div class="session-track"><div class="session-fill" style="width:${progress}%"></div></div>
 
-        <article class="flashcard" data-flip>
-          <div class="card-top">
-            <span class="language-mark">ES</span>
-            <div class="tags">
-              <span class="tag">${escapeHtml(word.pos)}</span>
-              ${word.gender ? `<span class="tag">${escapeHtml(word.gender)}</span>` : ''}
-              <span class="tag level">${escapeHtml(word.level || 'A1')}</span>
-            </div>
-          </div>
-          <div class="card-main">
-            ${session.flipped ? `
-              <div class="word-large word-back">${escapeHtml(word.zh)}</div>
-              ${word.register ? `<div class="word-register">${escapeHtml(word.register)} · ${escapeHtml(category.name)}</div>` : ''}
-              ${word.collocation ? `<div class="collocation"><strong>常见搭配：</strong>${escapeHtml(word.collocation)}</div>` : ''}
-              <div class="example-box">${escapeHtml(word.example)}</div>
-              <div class="example-zh">${escapeHtml(word.exampleZh)}</div>
-            ` : `
-              <div class="word-large">${escapeHtml(word.es)}</div>
-              <button class="speak-button" data-action="speak" data-speak="${escapeHtml(word.es)}">🔊 朗读</button>
-              <div class="card-hint">先在心里回想中文意思和常见搭配。</div>
-              <div class="card-hint" style="color:#b39a87">点击卡片揭晓答案</div>
-            `}
-          </div>
-          <div class="card-bottom">
-            <span>ESPANOL · ${escapeHtml(word.level || 'A1')}</span>
-            <span>${session.flipped ? '再回忆一次，再判断' : '回忆完成后再翻面'}</span>
-          </div>
-        </article>
+        <div class="study-columns">
+          <div class="study-focus">
+            <article class="flashcard" data-flip>
+              <div class="card-top">
+                <span class="language-mark">ES</span>
+                <div class="tags">
+                  <span class="tag">${escapeHtml(word.pos)}</span>
+                  ${word.gender ? `<span class="tag">${escapeHtml(word.gender)}</span>` : ''}
+                  <span class="tag level">${escapeHtml(word.level || 'A1')}</span>
+                </div>
+              </div>
+              <div class="card-main">
+                ${session.flipped ? `
+                  <div class="word-large word-back">${escapeHtml(word.zh)}</div>
+                  ${word.register ? `<div class="word-register">${escapeHtml(word.register)} · ${escapeHtml(category.name)}</div>` : ''}
+                  ${word.collocation ? `<div class="collocation"><strong>常见搭配：</strong>${escapeHtml(word.collocation)}</div>` : ''}
+                  <div class="example-box">${escapeHtml(word.example)}</div>
+                  <div class="example-zh">${escapeHtml(word.exampleZh)}</div>
+                ` : `
+                  <div class="word-large">${escapeHtml(word.es)}</div>
+                  <button class="speak-button" data-action="speak" data-speak="${escapeHtml(word.es)}">🔊 朗读</button>
+                  <div class="card-hint">先在心里回想中文意思和常见搭配。</div>
+                  <div class="card-hint" style="color:#b39a87">点击卡片揭晓答案</div>
+                `}
+              </div>
+              <div class="card-bottom">
+                <span>ESPANOL · ${escapeHtml(word.level || 'A1')}</span>
+                <span>${session.flipped ? '再回忆一次，再判断' : '回忆完成后再翻面'}</span>
+              </div>
+            </article>
 
-        ${session.flipped ? `
-          <div class="study-action-row">
-            <button class="primary-button study-next" data-action="next-card">下一个</button>
+            ${session.flipped ? `
+              <div class="study-action-row">
+                <button class="primary-button study-next" data-action="next-card">下一个</button>
+              </div>
+              <div class="swipe-hint">左滑“还不熟” · 右滑“记住了” · 点击按钮直接继续</div>
+              <div class="sm-note">系统会按 SM-2 间隔自动安排下次复习</div>
+            ` : ''}
           </div>
-          <div class="swipe-hint">左滑“还不熟” · 右滑“记住了” · 点击按钮直接继续</div>
-          <div class="sm-note">系统会按 SM-2 间隔自动安排下次复习</div>
-        ` : ''}
+
+          <aside class="study-side">
+            <div class="side-panel">
+              <span class="eyebrow">CURRENT WORD</span>
+              <h3>${escapeHtml(word.es)}</h3>
+              <div class="side-meta">
+                <span>${escapeHtml(targetLevel)}</span>
+                <span>${escapeHtml(word.pos)}</span>
+                <span>${escapeHtml(category.name)}</span>
+              </div>
+              <button class="secondary-button side-speak" data-action="speak" data-speak="${escapeHtml(word.es)}">🔊 听发音</button>
+              <div class="side-divider"></div>
+              <div class="side-label">本轮进度</div>
+              <div class="side-progress-copy"><strong>${session.index + 1}</strong><span>/ ${session.queue.length}</span></div>
+              <div class="side-label">键盘快捷键</div>
+              <div class="shortcut-row"><kbd>←</kbd><span>还不熟</span></div>
+              <div class="shortcut-row"><kbd>→</kbd><span>记住了</span></div>
+              <div class="shortcut-row"><kbd>Space</kbd><span>下一个</span></div>
+              <div class="shortcut-row"><kbd>⌘ Z</kbd><span>撤销</span></div>
+            </div>
+          </aside>
+        </div>
       </section>
     `;
   }
@@ -593,33 +618,39 @@
           <span class="badge">${question.direction}</span>
         </div>
         <div class="session-track"><div class="session-fill" style="width:${session.index * 10}%"></div></div>
-        <div class="question-card">
-          <div class="question-label">请选择正确的意思</div>
-          <div class="question-word">${escapeHtml(question.prompt)}</div>
-          ${question.direction === '西 → 中' ? `<button class="question-speak" data-action="speak" data-speak="${escapeHtml(question.word.es)}">🔊 听发音</button>` : ''}
-        </div>
-        <div class="options-list">
-          ${question.options.map((option, index) => {
-            let className = 'option-button';
-            if (question.answered && option.correct) className += ' correct';
-            if (question.answered && question.selected === option.text && !option.correct) className += ' wrong';
-            return `
-              <button class="${className}" data-quiz-option="${index}" ${question.answered ? 'disabled' : ''}>
-                <span class="option-letter">${option.letter}</span>
-                <span>${escapeHtml(option.text)}</span>
-                ${question.answered && option.correct ? '<span style="margin-left:auto;color:#0d8a58">✓</span>' : ''}
-              </button>
-            `;
-          }).join('')}
-        </div>
-        ${question.answered ? `
-          <div class="feedback-box ${question.selected === question.answer ? 'good' : ''}">
-            <div class="feedback-title">${question.selected === question.answer ? '答对了' : `正确答案：${escapeHtml(question.answer)}`}</div>
-            <div class="feedback-example">${escapeHtml(question.word.example)}</div>
-            <div class="feedback-zh">${escapeHtml(question.word.exampleZh)}</div>
-            <button class="primary-button" style="margin-top:14px" data-action="quiz-next">${session.index === 9 ? '查看结果' : '下一题'}</button>
+        <div class="quiz-columns">
+          <div class="quiz-left">
+            <div class="question-card">
+              <div class="question-label">请选择正确的意思</div>
+              <div class="question-word">${escapeHtml(question.prompt)}</div>
+              ${question.direction === '西 → 中' ? `<button class="question-speak" data-action="speak" data-speak="${escapeHtml(question.word.es)}">🔊 听发音</button>` : ''}
+            </div>
           </div>
-        ` : ''}
+          <div class="quiz-right">
+            <div class="options-list">
+              ${question.options.map((option, index) => {
+                let className = 'option-button';
+                if (question.answered && option.correct) className += ' correct';
+                if (question.answered && question.selected === option.text && !option.correct) className += ' wrong';
+                return `
+                  <button class="${className}" data-quiz-option="${index}" ${question.answered ? 'disabled' : ''}>
+                    <span class="option-letter">${option.letter}</span>
+                    <span>${escapeHtml(option.text)}</span>
+                    ${question.answered && option.correct ? '<span style="margin-left:auto;color:#0d8a58">✓</span>' : ''}
+                  </button>
+                `;
+              }).join('')}
+            </div>
+            ${question.answered ? `
+              <div class="feedback-box ${question.selected === question.answer ? 'good' : ''}">
+                <div class="feedback-title">${question.selected === question.answer ? '答对了' : `正确答案：${escapeHtml(question.answer)}`}</div>
+                <div class="feedback-example">${escapeHtml(question.word.example)}</div>
+                <div class="feedback-zh">${escapeHtml(question.word.exampleZh)}</div>
+                <button class="primary-button" style="margin-top:14px" data-action="quiz-next">${session.index === 9 ? '查看结果' : '下一题'}</button>
+              </div>
+            ` : ''}
+          </div>
+        </div>
       </section>
     `;
   }
@@ -706,31 +737,37 @@
           <span class="badge" style="background:#d8f3ee;color:#0f766e">答对 ${session.score}</span>
         </div>
         <div class="session-track"><div class="session-fill" style="width:${session.index * 10}%;background:linear-gradient(90deg,#0f766e,#2dd4bf)"></div></div>
-        <div class="question-card verb">
-          <div class="question-word">${escapeHtml(question.verb.infinitive)}</div>
-          <div class="question-meta">${escapeHtml(question.verb.meaning)}</div>
-          <div class="question-meta">${escapeHtml(question.tense.name)} × ${escapeHtml(question.pronoun)}</div>
-        </div>
-        <div class="options-list">
-          ${question.options.map((option, index) => {
-            let className = 'option-button';
-            if (question.answered && option.correct) className += ' correct';
-            if (question.answered && question.selected === option.text && !option.correct) className += ' wrong';
-            return `
-              <button class="${className}" data-drill-option="${index}" ${question.answered ? 'disabled' : ''}>
-                <span class="option-letter">${option.letter}</span>
-                <span>${escapeHtml(option.text)}</span>
-              </button>
-            `;
-          }).join('')}
-        </div>
-        ${question.answered ? `
-          <div class="feedback-box ${question.selected === question.answer ? 'good' : ''}">
-            <div class="feedback-title">${question.selected === question.answer ? '正确' : `正确答案：${escapeHtml(question.answer)}`}</div>
-            <div class="feedback-zh">${escapeHtml(question.verb.infinitive)} · ${escapeHtml(question.tense.name)} · ${escapeHtml(question.pronoun)}</div>
-            <button class="primary-button" style="margin-top:14px" data-action="drill-next">${session.index === 9 ? '查看结果' : '下一题'}</button>
+        <div class="quiz-columns">
+          <div class="quiz-left">
+            <div class="question-card verb">
+              <div class="question-word">${escapeHtml(question.verb.infinitive)}</div>
+              <div class="question-meta">${escapeHtml(question.verb.meaning)}</div>
+              <div class="question-meta">${escapeHtml(question.tense.name)} × ${escapeHtml(question.pronoun)}</div>
+            </div>
           </div>
-        ` : ''}
+          <div class="quiz-right">
+            <div class="options-list">
+              ${question.options.map((option, index) => {
+                let className = 'option-button';
+                if (question.answered && option.correct) className += ' correct';
+                if (question.answered && question.selected === option.text && !option.correct) className += ' wrong';
+                return `
+                  <button class="${className}" data-drill-option="${index}" ${question.answered ? 'disabled' : ''}>
+                    <span class="option-letter">${option.letter}</span>
+                    <span>${escapeHtml(option.text)}</span>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+            ${question.answered ? `
+              <div class="feedback-box ${question.selected === question.answer ? 'good' : ''}">
+                <div class="feedback-title">${question.selected === question.answer ? '正确' : `正确答案：${escapeHtml(question.answer)}`}</div>
+                <div class="feedback-zh">${escapeHtml(question.verb.infinitive)} · ${escapeHtml(question.tense.name)} · ${escapeHtml(question.pronoun)}</div>
+                <button class="primary-button" style="margin-top:14px" data-action="drill-next">${session.index === 9 ? '查看结果' : '下一题'}</button>
+              </div>
+            ` : ''}
+          </div>
+        </div>
       </section>
     `;
   }

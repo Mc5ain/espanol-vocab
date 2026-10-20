@@ -48,6 +48,14 @@ button {
   cursor: pointer;
 }
 
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid rgba(208, 74, 45, .35);
+  outline-offset: 2px;
+}
+
 .app-shell {
   min-height: 100vh;
   display: grid;
@@ -557,8 +565,109 @@ button {
 }
 
 .study-layout {
-  max-width: 800px;
+  max-width: 1080px;
   margin: 0 auto;
+}
+
+.study-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 290px;
+  gap: 24px;
+  align-items: start;
+}
+
+.study-focus {
+  min-width: 0;
+}
+
+.study-side {
+  position: sticky;
+  top: 112px;
+}
+
+.side-panel {
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--surface);
+  box-shadow: 0 14px 38px rgba(104, 57, 23, .07);
+}
+
+.side-panel h3 {
+  margin: 8px 0 10px;
+  font-size: 28px;
+  overflow-wrap: anywhere;
+}
+
+.side-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.side-meta span {
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #f4e8dc;
+  color: #76523b;
+  font-size: 11px;
+}
+
+.side-speak {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.side-divider {
+  height: 1px;
+  margin: 20px 0;
+  background: var(--line);
+}
+
+.side-label {
+  margin: 16px 0 8px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+}
+
+.side-progress-copy {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.side-progress-copy strong {
+  font-size: 30px;
+}
+
+.side-progress-copy span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.shortcut-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+kbd {
+  min-width: 38px;
+  padding: 4px 7px;
+  border: 1px solid #dfcbb9;
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: #fbf3eb;
+  color: #5f4332;
+  font-family: inherit;
+  font-size: 10px;
+  text-align: center;
 }
 
 .session-head {
@@ -867,8 +976,20 @@ button {
 
 .quiz-layout,
 .conjugation-layout {
-  max-width: 780px;
+  max-width: 980px;
   margin: 0 auto;
+}
+
+.quiz-columns {
+  display: grid;
+  grid-template-columns: minmax(260px, .9fr) minmax(0, 1.1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.quiz-left,
+.quiz-right {
+  min-width: 0;
 }
 
 .question-card {
@@ -1257,6 +1378,16 @@ button {
     padding: 18px 16px 100px;
   }
 
+  .study-columns,
+  .quiz-columns {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .study-side {
+    display: none;
+  }
+
   .hero-grid {
     grid-template-columns: 1fr;
     gap: 24px;
@@ -1332,6 +1463,28 @@ button {
   .bottom-item.active {
     background: #9b221c;
     color: #fff;
+  }
+}
+
+@media (min-width: 1050px) {
+  #vocab-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  #vocab-list .word-row {
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--surface);
+  }
+
+  #vocab-list .word-row + .word-row {
+    border-top: 1px solid var(--line);
   }
 }
 
