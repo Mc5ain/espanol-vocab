@@ -8,6 +8,7 @@
   const app = document.querySelector('#app');
   const toast = document.querySelector('#toast');
   const aboutDialog = document.querySelector('#about-dialog');
+  const importInput = document.querySelector('#import-file');
 
   let currentView = 'home';
   let studySession = null;
@@ -29,6 +30,28 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
+  }
+
+  function normalizeText(value) {
+    return String(value || '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase();
+  }
+
+  function speakSpanish(text) {
+    if (!('speechSynthesis' in window) || !('SpeechSynthesisUtterance' in window)) {
+      showToast('当前浏览器不支持语音朗读');
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'es-ES';
+    utterance.rate = 0.82;
+    const voices = window.speechSynthesis.getVoices();
+    const spanishVoice = voices.find(voice => /^es(-|_)/i.test(voice.lang));
+    if (spanishVoice) utterance.voice = spanishVoice;
+    window.speechSynthesis.speak(utterance);
   }
 
   function shuffle(list) {
@@ -390,17 +413,20 @@
             <span class="language-mark">ES</span>
             <div class="tags">
               <span class="tag">${escapeHtml(word.pos)}</span>
+              ${word.gender ? `<span class="tag">${escapeHtml(word.gender)}</span>` : ''}
               <span class="tag level">${escapeHtml(word.level || 'A1')}</span>
             </div>
           </div>
           <div class="card-main">
             ${session.flipped ? `
               <div class="word-large word-back">${escapeHtml(word.zh)}</div>
+              ${word.register ? `<div class="word-register">${escapeHtml(word.register)} · ${escapeHtml(category.name)}</div>` : ''}
               ${word.collocation ? `<div class="collocation"><strong>常见搭配：</strong>${escapeHtml(word.collocation)}</div>` : ''}
               <div class="example-box">${escapeHtml(word.example)}</div>
               <div class="example-zh">${escapeHtml(word.exampleZh)}</div>
             ` : `
               <div class="word-large">${escapeHtml(word.es)}</div>
+              <button class="speak-button" data-action="speak" data-speak="${escapeHtml(word.es)}">🔊 朗读</button>
               <div class="card-hint">先在心里回想中文意思和常见搭配。</div>
               <div class="card-hint" style="color:#b39a87">点击卡片揭晓答案</div>
             `}
@@ -680,10 +706,11 @@
       if (vocabularyState.category !== 'all' && word.category !== vocabularyState.category) return false;
       if (vocabularyState.level !== 'all' && (word.level || 'A1') !== vocabularyState.level) return false;
       if (!query) return true;
-      return word.es.toLowerCase().includes(query) ||
+      const normalizedQuery = normalizeText(query);
+      return normalizeText(word.es).includes(normalizedQuery) ||
         word.zh.includes(query) ||
-        word.example.toLowerCase().includes(query) ||
-        (word.collocation || '').toLowerCase().includes(query);
+        normalizeText(word.example).includes(normalizedQuery) ||
+        normalizeText(word.collocation).includes(normalizedQuery);
     });
   }
 
@@ -730,6 +757,8 @@
                     <span style="color:${category.color}">${escapeHtml(category.name)}</span>
                     <span>·</span><span>${escapeHtml(word.level || 'A1')}</span>
                     <span>·</span><span>${escapeHtml(word.pos)}</span>
+                    ${word.gender ? `<span>·</span><span>${escapeHtml(word.gender)}</span>` : ''}
+                    ${word.register ? `<span>·</span><span>${escapeHtml(word.register)}</span>` : ''}
                   </span>
                 </span>
                 <span class="status-pill ${status.key}">${status.label}</span>
@@ -756,7 +785,76 @@
     showToast.timer = setTimeout(() => toast.classList.remove('show'), 1800);
   }
 
+  function exportProgress() {
+    const payload = {
+      app: 'espanol-vocab',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      targetLevel,
+      state: loadState()
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `espanol-progress-${todayKey()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    showToast('学习记录已导出');
+  }
+
+  function importProgress(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const payload = JSON.parse(reader.result);
+        const imported = payload.state || payload;
+        if (!imported || typeof imported.records !== 'object') {
+          throw new Error('文件缺少学习记录');
+        }
+        if (!confirm('导入会覆盖当前学习记录，确定继续吗？')) return;
+        const allowedIds = new Set(WORDS.map(word => word.id));
+        const records = {};
+        Object.keys(imported.records).forEach(id => {
+          if (allowedIds.has(id) && imported.records[id]) {
+            records[id] = imported.records[id];
+          }
+        });
+        const normalized = {
+          records,
+          daily: imported.daily || defaultState().daily,
+          streak: imported.streak || defaultState().streak
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+        if (['B1', 'B2', 'C1'].includes(payload.targetLevel)) {
+          targetLevel = payload.targetLevel;
+          localStorage.setItem(TARGET_KEY, targetLevel);
+          vocabularyState.level = targetLevel;
+        }
+        studySession = null;
+        quizSession = null;
+        aboutDialog.close();
+        render();
+        showToast('学习记录已恢复');
+      } catch (error) {
+        showToast('导入失败：' + error.message);
+      } finally {
+        importInput.value = '';
+      }
+    };
+    reader.readAsText(file);
+  }
+
   document.addEventListener('click', event => {
+    const speakButton = event.target.closest('[data-action="speak"]');
+    if (speakButton) {
+      event.preventDefault();
+      speakSpanish(speakButton.dataset.speak);
+      return;
+    }
     const targetButton = event.target.closest('[data-target-level]');
     if (targetButton) {
       targetLevel = targetButton.dataset.targetLevel;
@@ -849,7 +947,19 @@
         render();
         showToast('学习记录已清除');
       }
+      return;
     }
+    if (event.target.closest('[data-export-progress]')) {
+      exportProgress();
+      return;
+    }
+    if (event.target.closest('[data-import-progress]')) {
+      importInput.click();
+    }
+  });
+
+  importInput.addEventListener('change', event => {
+    importProgress(event.target.files && event.target.files[0]);
   });
 
   app.addEventListener('input', event => {

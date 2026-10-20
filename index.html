@@ -77,8 +77,11 @@
     <p>词条、例句和界面为本项目编写。离线安装后，学习记录保存在当前浏览器。</p>
     <div class="dialog-actions">
       <a class="primary-link" href="THIRD_PARTY_NOTICES.md" target="_blank" rel="noreferrer">查看第三方许可</a>
+      <button class="primary-link" data-export-progress>导出学习记录</button>
+      <button class="secondary-link" data-import-progress>导入学习记录</button>
       <button class="danger-link" data-clear-progress>清除学习记录</button>
     </div>
+    <input id="import-file" type="file" accept=".json,application/json" hidden>
   </dialog>
 
   <div class="toast" id="toast" role="status"></div>

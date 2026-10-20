@@ -654,6 +654,24 @@ button {
   font-weight: 700;
 }
 
+.word-register {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.speak-button {
+  align-self: flex-start;
+  margin-top: 18px;
+  padding: 9px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff3df;
+  color: #9a4d0d;
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .card-main {
   margin: auto 0;
 }
@@ -1095,6 +1113,7 @@ button {
 }
 
 .primary-link,
+.secondary-link,
 .danger-link {
   padding: 11px 16px;
   border: 0;
@@ -1107,6 +1126,11 @@ button {
 .primary-link {
   background: #26150f;
   color: #fff;
+}
+
+.secondary-link {
+  background: #f2e5d8;
+  color: #5f4332;
 }
 
 .danger-link {
