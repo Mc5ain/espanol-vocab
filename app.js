@@ -15,6 +15,8 @@
   let quizSession = null;
   let drillSession = null;
   let deferredInstallPrompt = null;
+  let swipeStart = null;
+  let suppressFlipUntil = 0;
   let targetLevel = localStorage.getItem(TARGET_KEY) || 'B2';
   const vocabularyState = {
     query: '',
@@ -212,7 +214,18 @@
       else if (record.dueAt <= Date.now()) due.push(word);
     });
     due.sort((a, b) => state.records[a.id].dueAt - state.records[b.id].dueAt);
-    return due.concat(fresh).slice(0, limit);
+    return due.concat(shuffle(fresh)).slice(0, limit);
+  }
+
+  function getDueQueue(limit) {
+    const state = loadState();
+    return WORDS
+      .filter(word => {
+        const record = state.records[word.id];
+        return wordLevel(word) === targetLevel && record && record.dueAt <= Date.now();
+      })
+      .sort((a, b) => state.records[a.id].dueAt - state.records[b.id].dueAt)
+      .slice(0, limit);
   }
 
   function wordStatus(id) {
@@ -312,6 +325,13 @@
           <div class="stat"><strong>${data.accuracy}%</strong><span>正确率</span></div>
         </div>
 
+        ${data.due ? `
+          <button class="review-banner" data-start-due>
+            <span><strong>${data.due}</strong> 个 ${targetLevel} 词今天到期</span>
+            <span>开始专项复习 →</span>
+          </button>
+        ` : ''}
+
         <div class="dele-level-strip">
           <span>当前目标</span>
           <div class="level-switch">
@@ -357,14 +377,17 @@
     `;
   }
 
-  function startStudy() {
+  function startStudy(mode) {
+    const dueOnly = mode === 'due';
     studySession = {
-      queue: getQueue(20),
+      queue: dueOnly ? getDueQueue(20) : getQueue(20),
       index: 0,
       flipped: false,
       known: 0,
       weak: 0,
-      finished: false
+      finished: false,
+      history: [],
+      mode: dueOnly ? 'due' : 'daily'
     };
   }
 
@@ -376,7 +399,8 @@
         '间隔复习比连续死记更牢。答错的内容会重新进入短周期复习。',
         session ? session.known : 0,
         session ? session.weak : 0,
-        'study-again'
+        'study-again',
+        session && session.history && session.history.length > 0
       );
       return;
     }
@@ -404,7 +428,10 @@
       <section class="view study-layout">
         <div class="session-head">
           <span class="session-count">${session.index + 1} / ${session.queue.length}</span>
-          <span class="badge">${escapeHtml(category.name)}</span>
+          <div class="session-tools">
+            ${session.history.length ? '<button class="undo-chip" data-action="undo-card">撤销</button>' : ''}
+            <span class="badge">${escapeHtml(category.name)}</span>
+          </div>
         </div>
         <div class="session-track"><div class="session-fill" style="width:${progress}%"></div></div>
 
@@ -438,7 +465,10 @@
         </article>
 
         ${session.flipped ? `
-          <button class="primary-button study-next" data-action="next-card">下一个</button>
+          <div class="study-action-row">
+            <button class="primary-button study-next" data-action="next-card">下一个</button>
+          </div>
+          <div class="swipe-hint">左滑“还不熟” · 右滑“记住了” · 点击按钮直接继续</div>
           <div class="sm-note">系统会按 SM-2 间隔自动安排下次复习</div>
         ` : ''}
       </section>
@@ -449,6 +479,12 @@
     const session = studySession;
     if (!session || !session.flipped || session.finished) return;
     const word = session.queue[session.index];
+    session.history.push({
+      state: localStorage.getItem(STORAGE_KEY),
+      index: session.index,
+      known: session.known,
+      weak: session.weak
+    });
     gradeWord(word.id, grade);
     if (grade >= 3) session.known += 1;
     else session.weak += 1;
@@ -458,7 +494,23 @@
     renderStudy();
   }
 
-  function finishPanel(title, text, known, weak, action) {
+  function undoLastCard() {
+    const session = studySession;
+    if (!session || !session.history || !session.history.length) return;
+    const previous = session.history.pop();
+    if (previous.state == null) localStorage.removeItem(STORAGE_KEY);
+    else localStorage.setItem(STORAGE_KEY, previous.state);
+    session.index = previous.index;
+    session.known = previous.known;
+    session.weak = previous.weak;
+    session.flipped = true;
+    session.finished = false;
+    updateHeader();
+    renderStudy();
+    showToast('已撤销上一张');
+  }
+
+  function finishPanel(title, text, known, weak, action, canUndo) {
     return `
       <section class="view">
         <div class="finish-panel">
@@ -470,6 +522,7 @@
           </div>
           <div class="button-row">
             <button class="primary-button" data-action="study-again">再学一轮</button>
+            ${canUndo ? '<button class="secondary-button" data-action="undo-card">撤销上一张</button>' : ''}
             <button class="secondary-button" data-nav="home">返回首页</button>
           </div>
         </div>
@@ -543,6 +596,7 @@
         <div class="question-card">
           <div class="question-label">请选择正确的意思</div>
           <div class="question-word">${escapeHtml(question.prompt)}</div>
+          ${question.direction === '西 → 中' ? `<button class="question-speak" data-action="speak" data-speak="${escapeHtml(question.word.es)}">🔊 听发音</button>` : ''}
         </div>
         <div class="options-list">
           ${question.options.map((option, index) => {
@@ -768,6 +822,7 @@
           </button>
           ${expanded ? `
             <div class="word-detail">
+              <button class="inline-speak" data-action="speak" data-speak="${escapeHtml(word.es)}">🔊 朗读</button>
               ${word.collocation ? `<strong>搭配：</strong>${escapeHtml(word.collocation)}<br>` : ''}
               ${escapeHtml(word.example)}
               <small>${escapeHtml(word.exampleZh)}</small>
@@ -877,7 +932,13 @@
       setView('study');
       return;
     }
+    if (event.target.closest('[data-start-due]')) {
+      startStudy('due');
+      setView('study');
+      return;
+    }
     if (event.target.closest('[data-flip]')) {
+      if (Date.now() < suppressFlipUntil) return;
       if (studySession) {
         studySession.flipped = !studySession.flipped;
         renderStudy();
@@ -886,6 +947,10 @@
     }
     if (event.target.closest('[data-action="next-card"]')) {
       handleGrade(3);
+      return;
+    }
+    if (event.target.closest('[data-action="undo-card"]')) {
+      undoLastCard();
       return;
     }
     const quizOption = event.target.closest('[data-quiz-option]');
@@ -977,6 +1042,52 @@
     if (event.target.id === 'level-filter') {
       vocabularyState.level = event.target.value;
       renderVocabList();
+    }
+  });
+
+  app.addEventListener('touchstart', event => {
+    const card = event.target.closest('.flashcard');
+    const touch = event.touches && event.touches[0];
+    if (!card || !touch || !studySession || !studySession.flipped) return;
+    swipeStart = { x: touch.clientX, y: touch.clientY, at: Date.now() };
+  }, { passive: true });
+
+  app.addEventListener('touchend', event => {
+    if (!swipeStart || !studySession || !studySession.flipped) {
+      swipeStart = null;
+      return;
+    }
+    const touch = event.changedTouches && event.changedTouches[0];
+    if (!touch) return;
+    const dx = touch.clientX - swipeStart.x;
+    const dy = touch.clientY - swipeStart.y;
+    const elapsed = Date.now() - swipeStart.at;
+    swipeStart = null;
+    if (elapsed > 900 || Math.abs(dx) < 62 || Math.abs(dx) < Math.abs(dy) * 1.35) return;
+    suppressFlipUntil = Date.now() + 350;
+    if (dx > 0) {
+      handleGrade(5);
+      showToast('已记录：记住了');
+    } else {
+      handleGrade(2);
+      showToast('已记录：稍后复习');
+    }
+  }, { passive: true });
+
+  window.addEventListener('keydown', event => {
+    if (currentView !== 'study' || !studySession || !studySession.flipped) return;
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      handleGrade(5);
+    } else if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      handleGrade(2);
+    } else if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleGrade(3);
+    } else if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'z') {
+      event.preventDefault();
+      undoLastCard();
     }
   });
 

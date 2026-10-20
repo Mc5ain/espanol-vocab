@@ -573,6 +573,21 @@ button {
   font-weight: 800;
 }
 
+.session-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.undo-chip {
+  padding: 7px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .badge {
   padding: 7px 12px;
   border-radius: 999px;
@@ -728,10 +743,22 @@ button {
 }
 
 .study-next {
-  width: 100%;
-  margin-top: 20px;
+  flex: 1;
   padding: 16px;
   font-size: 15px;
+}
+
+.study-action-row {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.swipe-hint {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
 }
 
 .sm-note {
@@ -817,6 +844,21 @@ button {
   color: #5f4332;
 }
 
+.review-banner {
+  width: 100%;
+  margin-top: 16px;
+  padding: 15px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #f0cf9e;
+  border-radius: 18px;
+  background: #fff3df;
+  color: #9a4d0d;
+  font-size: 13px;
+  font-weight: 650;
+}
+
 .button-row {
   margin-top: 20px;
   display: flex;
@@ -863,6 +905,16 @@ button {
   margin-top: 12px;
   color: rgba(255,255,255,.65);
   font-size: 14px;
+}
+
+.question-speak {
+  margin-top: 14px;
+  padding: 8px 14px;
+  border: 1px solid rgba(255,255,255,.22);
+  border-radius: 999px;
+  background: rgba(255,255,255,.1);
+  color: #fff;
+  font-size: 12px;
 }
 
 .options-list {
@@ -1062,6 +1114,16 @@ button {
   display: block;
   margin-top: 4px;
   color: var(--muted);
+}
+
+.inline-speak {
+  margin-bottom: 10px;
+  padding: 6px 11px;
+  border: 1px solid #e3c8af;
+  border-radius: 999px;
+  background: #fffaf3;
+  color: #9a4d0d;
+  font-size: 11px;
 }
 
 .toggle-row {
