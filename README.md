@@ -1,0 +1,51 @@
+# Español 专业西语词汇 · 网页版
+
+面向西班牙语专业学生的离线优先网页应用，包含 273 个 A1–C1 词条、SM-2 间隔复习、双向选择题和动词变位训练。
+
+## 功能
+
+- 首页学习进度、待复习量和分类掌握度
+- 翻卡学习与 SM-2 四级反馈
+- 西班牙语与中文双向四选一
+- 现在时、简单过去时、现在虚拟式变位训练
+- 273 个词条的搜索、分类和 CEFR 等级筛选
+- 学习记录持久保存在浏览器 `localStorage`
+- PWA 离线缓存，可添加到手机主屏幕
+
+## 本地运行
+
+```bash
+npm run build
+npm run serve
+```
+
+打开 `http://localhost:4173/`。
+
+## 数据构建
+
+词条源文件位于 `src/data/`：
+
+- `words.js`：A1–A2 基础词
+- `professional.js`：B1–C1 专业词
+- `conjugations.js`：12 个动词的三种时态变位
+
+运行下面命令会生成浏览器使用的 `assets/data.js`：
+
+```bash
+npm run build
+```
+
+## 部署
+
+本项目是纯静态站点，可直接部署到 GitHub Pages。仓库默认分支为 `main`，Pages 使用根目录。
+
+## 来源与许可
+
+SM-2 算法改编自 MIT 授权的 `VienDinhCom/supermemo`：
+
+- https://github.com/VienDinhCom/supermemo
+- Copyright (c) 2020 Vien Dinh
+
+完整许可见 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)。
+
+词条、例句、界面和学习流程为本项目编写。
