@@ -411,18 +411,10 @@
           </div>
         </article>
 
-        <div class="grade-title">这次回忆有多清楚？</div>
-        <div class="grade-grid">
-          ${[
-            [0, '完全忘记'],
-            [2, '很模糊'],
-            [4, '想起来了'],
-            [5, '非常熟练']
-          ].map(([grade, label]) => `
-            <button class="grade-button" data-grade="${grade}" ${session.flipped ? '' : 'disabled'}>${label}</button>
-          `).join('')}
-        </div>
-        <div class="sm-note">SM-2 会根据记忆难度自动安排下次复习</div>
+        ${session.flipped ? `
+          <button class="primary-button study-next" data-action="next-card">下一个</button>
+          <div class="sm-note">系统会按 SM-2 间隔自动安排下次复习</div>
+        ` : ''}
       </section>
     `;
   }
@@ -448,8 +440,7 @@
           <h1>${escapeHtml(title)}</h1>
           <p>${escapeHtml(text)}</p>
           <div class="finish-stats">
-            <div><strong>${known}</strong><span>掌握</span></div>
-            <div><strong>${weak}</strong><span>待加强</span></div>
+            <div><strong>${known + weak}</strong><span>本轮复习</span></div>
           </div>
           <div class="button-row">
             <button class="primary-button" data-action="study-again">再学一轮</button>
@@ -795,9 +786,8 @@
       }
       return;
     }
-    const grade = event.target.closest('[data-grade]');
-    if (grade) {
-      handleGrade(Number(grade.dataset.grade));
+    if (event.target.closest('[data-action="next-card"]')) {
+      handleGrade(3);
       return;
     }
     const quizOption = event.target.closest('[data-quiz-option]');
