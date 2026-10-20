@@ -6,7 +6,7 @@ const wordsModule = require('../src/data/words');
 const conjugations = require('../src/data/conjugations');
 
 const payload = {
-  version: '1.0.0',
+  version: '1.1.0',
   words: wordsModule.WORDS,
   categories: wordsModule.CATEGORIES,
   pronouns: conjugations.PRONOUNS,

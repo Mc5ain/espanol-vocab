@@ -177,17 +177,35 @@ const WORDS = [
 const professional = require('./professional');
 const dele = require('./dele');
 const deleBook = require('./dele-book.json');
+const {
+  SUPPLEMENTS: deleSupplements,
+  ZH_OVERRIDES: deleZhOverrides
+} = require('./dele-supplements');
 Object.assign(CATEGORIES, professional.CATEGORIES, dele.CATEGORIES, {
   dele_b2_book: { name: 'DELE B2 原版精选', short: 'B2原版', color: '#b91c1c' }
 });
 
 const seen = new Set();
-const allWords = WORDS.concat(professional.WORDS, dele.WORDS, deleBook).filter(word => {
-  const key = word.es.trim().toLowerCase().replace(/\s+/g, ' ');
-  if (seen.has(key)) return false;
-  seen.add(key);
-  return true;
-});
+const allWords = WORDS
+  .concat(professional.WORDS, dele.WORDS, deleBook)
+  .filter(word => {
+    const key = word.es.trim().toLowerCase().replace(/\s+/g, ' ');
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  })
+  .map(word => {
+    let merged = deleSupplements[word.id]
+      ? { ...word, ...deleSupplements[word.id] }
+      : word;
+    if (deleZhOverrides[word.id]) {
+      merged = { ...merged, zh: deleZhOverrides[word.id] };
+    }
+    if (!merged.pos && /\s/.test(merged.es.trim())) {
+      return { ...merged, pos: '短语' };
+    }
+    return merged;
+  });
 
 module.exports = {
   CATEGORIES,

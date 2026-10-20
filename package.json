@@ -1,11 +1,11 @@
 {
   "name": "espanol-vocab-web",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "西班牙语专业词汇学习网页版",
   "scripts": {
     "build": "node scripts/build-data.js",
-    "test": "node scripts/check-data.js",
+    "test": "node scripts/check-data.js && node scripts/check-app.js",
     "check": "npm run build && npm test",
     "serve": "python3 -m http.server 4173"
   }
