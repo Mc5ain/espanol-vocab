@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#9b221c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Español 每日西语">
+  <title>Español 专业西语词汇</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#home" data-nav="home">
+        <span class="brand-mark">ES</span>
+        <span>
+          <strong>Español</strong>
+          <small>专业西语词汇</small>
+        </span>
+      </a>
+
+      <nav class="side-nav" aria-label="主导航">
+        <button class="nav-item active" data-nav="home"><span>⌂</span>今日</button>
+        <button class="nav-item" data-nav="study"><span>▤</span>学习</button>
+        <button class="nav-item" data-nav="quiz"><span>?</span>小测</button>
+        <button class="nav-item" data-nav="conjugation"><span>V</span>变位</button>
+        <button class="nav-item" data-nav="vocabulary"><span>Aa</span>词库</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="ghost-button" id="install-button">安装到设备</button>
+        <button class="text-button" data-open-about>数据与许可</button>
+      </div>
+    </aside>
+
+    <div class="workspace">
+      <header class="topbar">
+        <a class="mobile-brand" href="#home" data-nav="home">ES</a>
+        <div class="topbar-title">
+          <span id="view-kicker">每日学习</span>
+          <strong id="view-title">今天也背一点西语</strong>
+        </div>
+        <div class="topbar-actions">
+          <span class="streak-pill" id="streak-pill">连续 0 天</span>
+          <button class="icon-button" data-open-about aria-label="数据与许可">i</button>
+        </div>
+      </header>
+
+      <main id="app" class="app-main"></main>
+    </div>
+  </div>
+
+  <nav class="bottom-nav" aria-label="移动端导航">
+    <button class="bottom-item active" data-nav="home"><span>⌂</span><small>今日</small></button>
+    <button class="bottom-item" data-nav="study"><span>▤</span><small>学习</small></button>
+    <button class="bottom-item" data-nav="quiz"><span>?</span><small>小测</small></button>
+    <button class="bottom-item" data-nav="conjugation"><span>V</span><small>变位</small></button>
+    <button class="bottom-item" data-nav="vocabulary"><span>Aa</span><small>词库</small></button>
+  </nav>
+
+  <dialog id="about-dialog" class="about-dialog">
+    <div class="dialog-head">
+      <div>
+        <span class="eyebrow">ABOUT</span>
+        <h2>数据与许可</h2>
+      </div>
+      <button class="icon-button" data-close-about aria-label="关闭">×</button>
+    </div>
+    <p>本网页包含 273 个 A1–C1 西语词条，面向西班牙语专业学习。</p>
+    <p>SM-2 复习算法改编自 MIT 授权的 <strong>VienDinhCom/supermemo</strong>，版权归 Vien Dinh 所有。</p>
+    <p>词条、例句和界面为本项目编写。离线安装后，学习记录保存在当前浏览器。</p>
+    <div class="dialog-actions">
+      <a class="primary-link" href="THIRD_PARTY_NOTICES.md" target="_blank" rel="noreferrer">查看第三方许可</a>
+      <button class="danger-link" data-clear-progress>清除学习记录</button>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="assets/data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
