@@ -176,9 +176,20 @@ const WORDS = [
 
 const professional = require('./professional');
 const dele = require('./dele');
-Object.assign(CATEGORIES, professional.CATEGORIES, dele.CATEGORIES);
+const deleBook = require('./dele-book.json');
+Object.assign(CATEGORIES, professional.CATEGORIES, dele.CATEGORIES, {
+  dele_b2_book: { name: 'DELE B2 原版精选', short: 'B2原版', color: '#b91c1c' }
+});
+
+const seen = new Set();
+const allWords = WORDS.concat(professional.WORDS, dele.WORDS, deleBook).filter(word => {
+  const key = word.es.trim().toLowerCase().replace(/\s+/g, ' ');
+  if (seen.has(key)) return false;
+  seen.add(key);
+  return true;
+});
 
 module.exports = {
   CATEGORIES,
-  WORDS: WORDS.concat(professional.WORDS, dele.WORDS)
+  WORDS: allWords
 };

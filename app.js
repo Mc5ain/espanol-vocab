@@ -451,12 +451,12 @@
                   <div class="word-large word-back">${escapeHtml(word.zh)}</div>
                   ${word.register ? `<div class="word-register">${escapeHtml(word.register)} · ${escapeHtml(category.name)}</div>` : ''}
                   ${word.collocation ? `<div class="collocation"><strong>常见搭配：</strong>${escapeHtml(word.collocation)}</div>` : ''}
-                  <div class="example-box">${escapeHtml(word.example)}</div>
-                  <div class="example-zh">${escapeHtml(word.exampleZh)}</div>
+                  ${word.example ? `<div class="example-box">${escapeHtml(word.example)}</div>` : ''}
+                  ${word.exampleZh ? `<div class="example-zh">${escapeHtml(word.exampleZh)}</div>` : ''}
                 ` : `
                   <div class="word-large">${escapeHtml(word.es)}</div>
                   <button class="speak-button" data-action="speak" data-speak="${escapeHtml(word.es)}">🔊 朗读</button>
-                  <div class="card-hint">先在心里回想中文意思和常见搭配。</div>
+                  <div class="card-hint">先在心里回想中文意思${word.collocation ? '和常见搭配' : ''}。</div>
                   <div class="card-hint" style="color:#b39a87">点击卡片揭晓答案</div>
                 `}
               </div>
@@ -644,8 +644,8 @@
             ${question.answered ? `
               <div class="feedback-box ${question.selected === question.answer ? 'good' : ''}">
                 <div class="feedback-title">${question.selected === question.answer ? '答对了' : `正确答案：${escapeHtml(question.answer)}`}</div>
-                <div class="feedback-example">${escapeHtml(question.word.example)}</div>
-                <div class="feedback-zh">${escapeHtml(question.word.exampleZh)}</div>
+                ${question.word.example ? `<div class="feedback-example">${escapeHtml(question.word.example)}</div>` : ''}
+                ${question.word.exampleZh ? `<div class="feedback-zh">${escapeHtml(question.word.exampleZh)}</div>` : ''}
                 <button class="primary-button" style="margin-top:14px" data-action="quiz-next">${session.index === 9 ? '查看结果' : '下一题'}</button>
               </div>
             ` : ''}
@@ -861,8 +861,7 @@
             <div class="word-detail">
               <button class="inline-speak" data-action="speak" data-speak="${escapeHtml(word.es)}">🔊 朗读</button>
               ${word.collocation ? `<strong>搭配：</strong>${escapeHtml(word.collocation)}<br>` : ''}
-              ${escapeHtml(word.example)}
-              <small>${escapeHtml(word.exampleZh)}</small>
+              ${word.example ? `${escapeHtml(word.example)}<small>${escapeHtml(word.exampleZh)}</small>` : '原版 B2 精选词目，暂未附自编例句。'}
             </div>
           ` : ''}
         </div>
