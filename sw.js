@@ -1,4 +1,4 @@
-const CACHE = 'espanol-vocab-v8';
+const CACHE = 'espanol-vocab-v9';
 const ASSETS = [
   './',
   './index.html',
@@ -28,13 +28,18 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-      return fetch(event.request).then(response => {
+    fetch(event.request)
+      .then(response => {
+        if (!response || (!response.ok && response.type !== 'opaque')) return response;
         const copy = response.clone();
         caches.open(CACHE).then(cache => cache.put(event.request, copy));
         return response;
-      });
-    })
+      })
+      .catch(async () => {
+        const cached = await caches.match(event.request);
+        if (cached) return cached;
+        if (event.request.mode === 'navigate') return caches.match('./index.html');
+        throw new Error('Offline and no cached response available');
+      })
   );
 });

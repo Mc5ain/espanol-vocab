@@ -861,7 +861,7 @@
             <div class="word-detail">
               <button class="inline-speak" data-action="speak" data-speak="${escapeHtml(word.es)}">🔊 朗读</button>
               ${word.collocation ? `<strong>搭配：</strong>${escapeHtml(word.collocation)}<br>` : ''}
-              ${word.example ? `${escapeHtml(word.example)}<small>${escapeHtml(word.exampleZh)}</small>` : '原版 B2 精选词目，暂未附自编例句。'}
+              ${word.example ? `${escapeHtml(word.example)}<small>${escapeHtml(word.exampleZh)}</small>` : '该词条暂无可展示例句。'}
             </div>
           ` : ''}
         </div>
