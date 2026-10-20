@@ -1,4 +1,4 @@
-const CACHE = 'espanol-vocab-v1';
+const CACHE = 'espanol-vocab-v2';
 const ASSETS = [
   './',
   './index.html',
