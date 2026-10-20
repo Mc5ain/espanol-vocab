@@ -358,6 +358,50 @@ button {
   box-shadow: var(--shadow);
 }
 
+.dele-level-strip {
+  margin-top: 16px;
+  padding: 15px 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--surface);
+}
+
+.dele-level-strip > span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.dele-level-strip small {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.level-switch {
+  display: flex;
+  gap: 6px;
+}
+
+.level-switch button {
+  padding: 7px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #f8ece0;
+  color: #79553d;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.level-switch button.active {
+  border-color: var(--red);
+  background: var(--red);
+  color: #fff;
+}
+
 .stat {
   padding: 22px 18px;
   text-align: center;
@@ -1246,6 +1290,16 @@ button {
   .home-actions,
   .category-grid {
     grid-template-columns: 1fr;
+  }
+
+  .dele-level-strip {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .dele-level-strip small {
+    width: 100%;
+    margin-left: 0;
   }
 
   .quick-card.primary {

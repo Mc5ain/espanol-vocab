@@ -3,6 +3,7 @@
   const WORDS = DATA.words;
   const CATEGORIES = DATA.categories;
   const STORAGE_KEY = 'espanol_web_v1';
+  const TARGET_KEY = 'espanol_dele_target';
   const DAY_MS = 86400000;
   const app = document.querySelector('#app');
   const toast = document.querySelector('#toast');
@@ -13,6 +14,7 @@
   let quizSession = null;
   let drillSession = null;
   let deferredInstallPrompt = null;
+  let targetLevel = localStorage.getItem(TARGET_KEY) || 'B2';
   const vocabularyState = {
     query: '',
     category: 'all',
@@ -157,17 +159,20 @@
   function overview() {
     const state = loadState();
     const now = Date.now();
-    const records = Object.values(state.records);
+    const levelWords = wordsForLevel(targetLevel);
+    const records = levelWords
+      .map(word => state.records[word.id])
+      .filter(Boolean);
     const correct = records.reduce((sum, item) => sum + (item.correct || 0), 0);
     const attempts = records.reduce(
       (sum, item) => sum + (item.correct || 0) + (item.wrong || 0),
       0
     );
     return {
-      total: WORDS.length,
+      total: levelWords.length,
       learned: records.length,
       due: records.filter(item => item.dueAt <= now).length,
-      fresh: WORDS.length - records.length,
+      fresh: levelWords.length - records.length,
       accuracy: attempts ? Math.round((correct / attempts) * 100) : 0,
       today: state.daily,
       streak: state.streak
@@ -178,7 +183,7 @@
     const state = loadState();
     const due = [];
     const fresh = [];
-    WORDS.forEach(word => {
+    wordsForLevel(targetLevel).forEach(word => {
       const record = state.records[word.id];
       if (!record) fresh.push(word);
       else if (record.dueAt <= Date.now()) due.push(word);
@@ -197,7 +202,7 @@
   function categoryProgress() {
     const records = loadState().records;
     return Object.keys(CATEGORIES).map(key => {
-      const list = WORDS.filter(word => word.category === key);
+      const list = wordsForLevel(targetLevel).filter(word => word.category === key);
       const learned = list.filter(word => records[word.id]).length;
       return {
         key,
@@ -206,7 +211,15 @@
         learned,
         percent: list.length ? Math.round((learned / list.length) * 100) : 0
       };
-    });
+    }).filter(item => item.total > 0);
+  }
+
+  function wordLevel(word) {
+    return word.level || 'A1';
+  }
+
+  function wordsForLevel(level) {
+    return WORDS.filter(word => wordLevel(word) === level);
   }
 
   function setView(view) {
@@ -223,11 +236,11 @@
 
   function updateHeader() {
     const meta = {
-      home: ['每日学习', '今天也背一点西语'],
+      home: [`DELE ${targetLevel}`, `今天也背一点 DELE ${targetLevel} 词汇`],
       study: ['SM-2 复习', '把词真正记住'],
       quiz: ['随机小测', '双向回忆训练'],
       conjugation: ['动词变位', '规则与不规则形式'],
-      vocabulary: ['专业词库', 'A1–C1 共 273 词']
+      vocabulary: ['DELE 词库', `共 ${WORDS.length} 词 · 当前 ${targetLevel}`]
     }[currentView];
     document.querySelector('#view-kicker').textContent = meta[0];
     document.querySelector('#view-title').textContent = meta[1];
@@ -256,7 +269,7 @@
             <div>
               <span class="eyebrow">APRENDE CADA DÍA</span>
               <h1>¡Hola!</h1>
-              <p>面向西语专业的词汇、篇章表达和动词变位训练。<br>先回忆，再揭晓，让复习间隔自动适应记忆难度。</p>
+              <p>按 DELE ${targetLevel} 级别组织词汇、篇章表达和动词变位训练。<br>先回忆，再揭晓，让复习间隔自动适应记忆难度。</p>
             </div>
             <div class="goal-panel">
               <div class="goal-head">
@@ -276,11 +289,19 @@
           <div class="stat"><strong>${data.accuracy}%</strong><span>正确率</span></div>
         </div>
 
+        <div class="dele-level-strip">
+          <span>当前目标</span>
+          <div class="level-switch">
+            ${['B1', 'B2', 'C1'].map(level => `<button class="${targetLevel === level ? 'active' : ''}" data-target-level="${level}">DELE ${level}</button>`).join('')}
+          </div>
+          <small>按公开 DELE 能力主题自主整理，非官方词表</small>
+        </div>
+
         <div class="home-actions">
           <button class="quick-card primary" data-start-study>
             <span class="icon">▤</span>
             <h3>开始今日学习</h3>
-            <p>${data.due} 个待复习 · ${Math.min(20, data.fresh)} 个新词将进入队列</p>
+            <p>${data.due} 个 ${targetLevel} 待复习 · ${Math.min(20, data.fresh)} 个新词将进入队列</p>
           </button>
           <button class="quick-card" data-nav="quiz">
             <span class="icon">?</span>
@@ -440,11 +461,11 @@
   }
 
   function buildQuiz() {
-    return shuffle(WORDS).slice(0, 10).map((word, index) => {
+    return shuffle(wordsForLevel(targetLevel)).slice(0, 10).map((word, index) => {
       const toChinese = index % 2 === 0;
       const answer = toChinese ? word.zh : word.es;
       const otherTexts = [];
-      shuffle(WORDS).forEach(item => {
+      shuffle(wordsForLevel(targetLevel)).forEach(item => {
         const text = toChinese ? item.zh : item.es;
         if (text !== answer && !otherTexts.includes(text)) otherTexts.push(text);
       });
@@ -745,6 +766,17 @@
   }
 
   document.addEventListener('click', event => {
+    const targetButton = event.target.closest('[data-target-level]');
+    if (targetButton) {
+      targetLevel = targetButton.dataset.targetLevel;
+      localStorage.setItem(TARGET_KEY, targetLevel);
+      vocabularyState.level = targetLevel;
+      studySession = null;
+      quizSession = null;
+      render();
+      showToast(`已切换到 DELE ${targetLevel}`);
+      return;
+    }
     const nav = event.target.closest('[data-nav]');
     if (nav) {
       event.preventDefault();

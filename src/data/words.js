@@ -175,9 +175,10 @@ const WORDS = [
 ];
 
 const professional = require('./professional');
-Object.assign(CATEGORIES, professional.CATEGORIES);
+const dele = require('./dele');
+Object.assign(CATEGORIES, professional.CATEGORIES, dele.CATEGORIES);
 
 module.exports = {
   CATEGORIES,
-  WORDS: WORDS.concat(professional.WORDS)
+  WORDS: WORDS.concat(professional.WORDS, dele.WORDS)
 };
